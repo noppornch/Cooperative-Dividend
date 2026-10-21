@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>พิมพ์ใบรายงานเงินปันผลเฉลี่ยคืน</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'TH Sarabun New', 'Sarabun', Tahoma, sans-serif;
+      font-size: 14pt;
+      line-height: 1.25;
+      color: #000;
+      background-color: #525659;
+    }
+
+    /* Floating control bar - hides during printing */
+    .print-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #1e3a8a;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 9999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      font-family: 'Sarabun', sans-serif;
+      font-size: 14px;
+    }
+    .print-bar button {
+      padding: 0.45rem 1rem;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .btn-print { background: #10b981; color: white; }
+    .btn-print:hover { background: #059669; }
+    .btn-close { background: #ef4444; color: white; margin-left: 0.5rem; }
+    .btn-close:hover { background: #dc2626; }
+
+    /* A4 Sheet Container */
+    .page-container {
+      margin-top: 55px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      max-height: 297mm;
+      background: white;
+      padding: 12mm 15mm 10mm 15mm;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Print media styles */
+    @media print {
+      body {
+        background-color: transparent !important;
+      }
+      .print-bar {
+        display: none !important;
+      }
+      .page-container {
+        margin-top: 0 !important;
+        gap: 0 !important;
+        padding-bottom: 0 !important;
+        display: block !important;
+      }
+      .sheet {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        max-height: 297mm !important;
+        margin: 0 !important;
+        padding: 12mm 15mm 10mm 15mm !important;
+        box-shadow: none !important;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+      }
+    }
+
+    /* Typography & Tables */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { vertical-align: top; padding: 1px 2px; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .text-left { text-align: left; }
+
+    .header-table td { padding: 1.5px 2px; }
+    h1.report-title {
+      font-size: 19pt;
+      font-weight: bold;
+      text-align: center;
+      margin: 0;
+      line-height: 1.15;
+    }
+    h2.report-org {
+      font-size: 16pt;
+      font-weight: bold;
+      text-align: center;
+      margin: 0 0 4px 0;
+      line-height: 1.15;
+    }
+
+    .border-b-2 { border-bottom: 2px solid black; }
+    .border-t-2 { border-top: 2px solid black; }
+    .border-b-double { border-bottom: 3px double black; }
+
+    /* Two-column table */
+    .content-table td {
+      font-size: 12.5pt;
+      padding: 1px 2px;
+      line-height: 1.25;
+    }
+    .u-line { text-decoration: underline; }
+
+    /* Mailing Box */
+    .send-box {
+      margin-top: 15px;
+      padding-top: 8px;
+      border-top: 2px solid black;
+    }
+    .send-box td {
+      font-size: 12.5pt;
+    }
+
+    /* Meeting Notice Box */
+    .meeting-box {
+      margin-top: 20px;
+      border: 1px solid black;
+      padding: 6px 12px;
+      text-align: center;
+      font-size: 12pt;
+    }
+    .meeting-title {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Print Bar -->
+  <div class="print-bar">
+    <div>
+      <strong>🖨️ ระบบพิมพ์ใบรายงานเงินปันผลเฉลี่ยคืน</strong>
+      <span style="opacity: 0.8; margin-left: 10px;" id="statusText">กำลังจัดเตรียมข้อมูล...</span>
+    </div>
+    <div>
+      <button class="btn-print" onclick="window.print()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        พิมพ์เอกสาร / บันทึกเป็น PDF
+      </button>
+      <button class="btn-close" onclick="window.close()">✕ ปิดหน้าต่าง</button>
+    </div>
+  </div>
+
+  <div class="page-container" id="pageContainer">
+    <!-- Sheets rendered here -->
+  </div>
+
+  <script>
+    let appConfig = {};
+
+    function fmt(val) {
+      if (val === null || val === undefined || val === '' || val === 0 || val === '0' || parseFloat(val) === 0) {
+        return '-';
+      }
+      return parseFloat(val).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    async function loadReport() {
+      // 1. Parse query parameters
+      const params = new URLSearchParams(window.location.search);
+      const year = params.get('year') || '2026';
+      const memos = params.get('memos');
+      const dept = params.get('dept');
+      const status_filter = params.get('status_filter');
+      const search = params.get('search');
+      const memo_from = params.get('memo_from');
+      const memo_to = params.get('memo_to');
+
+      // 2. Load config for the specified year
+      try {
+        const cfgRes = await fetch(`/api/config?year=${year}`);
+        appConfig = await cfgRes.json();
+      } catch (e) {
+        console.error('Failed to load config', e);
+      }
+
+      const apiParams = new URLSearchParams();
+      apiParams.append('year', year);
+      if (memos) apiParams.append('memos', memos);
+      if (dept) apiParams.append('dept', dept);
+      if (status_filter) apiParams.append('status_filter', status_filter);
+      if (search) apiParams.append('search', search);
+      if (memo_from) apiParams.append('memo_from', memo_from);
+      if (memo_to) apiParams.append('memo_to', memo_to);
+      apiParams.append('all', '1'); // Fetch all matching records
+
+      document.getElementById('statusText').textContent = 'กำลังดึงข้อมูลสมาชิก...';
+
+      try {
+        const res = await fetch(`/api/members?${apiParams.toString()}`);
+        const result = await res.json();
+        const list = result.data || [];
+
+        document.getElementById('statusText').textContent = `พร้อมพิมพ์ (ข้อมูลปี ${year}) ทั้งหมด ${list.length.toLocaleString()} รายการ`;
+
+        renderSheets(list);
+      } catch (err) {
+        document.getElementById('statusText').textContent = 'เกิดข้อผิดพลาดในการโหลดข้อมูล';
+        console.error(err);
+      }
+    }
+
+    function renderSheets(list) {
+      const container = document.getElementById('pageContainer');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="background:white; padding: 2rem; border-radius: 8px;">ไม่พบข้อมูลสมาชิกสำหรับการพิมพ์</div>';
+        return;
+      }
+
+      const cfg = appConfig;
+
+      list.forEach((data, index) => {
+        // Formatting values
+        const p1 = fmt(data.p1);
+        const p2 = fmt(data.p2);
+        const sum_p = fmt(data.sum_p);
+
+        const b1 = fmt(data.b1);
+        const b2 = fmt(data.b2);
+        const b3 = fmt(data.b3);
+        const b4 = fmt(data.b4);
+        const b5 = fmt(data.b5);
+        const b6 = fmt(data.b6);
+        const b7Val = (parseFloat(data.b71) || 0) + (parseFloat(data.b72) || 0);
+        const b7 = fmt(b7Val);
+
+        const d1 = fmt(data.d1);
+        const d2 = fmt(data.d2);
+        const d3 = fmt(data.d3);
+        const d4 = fmt(data.d4);
+        const d5 = fmt(data.d5);
+        const d6 = fmt(data.d6);
+        const d7 = fmt(data.d7);
+        const d81 = fmt(data.d81);
+        const d82 = fmt(data.d82);
+        const d9Val = (parseFloat(data.d83) || 0) + (parseFloat(data.d84) || 0);
+        const d9 = fmt(d9Val);
+
+        const t1 = fmt(data.t1);
+        const t2 = fmt(data.t2);
+
+        // Status text logic matching PHP print_report
+        let ln1 = '', ln2 = '', ln3 = '';
+        if (data.status === 'ศาลอายัด') {
+          ln1 = '';
+          ln2 = 'ศาลอายัด';
+          ln3 = '';
+        } else if (data.status === 'เงินสด') {
+          ln1 = '';
+          ln2 = 'เงินสด';
+          ln3 = '';
+        } else {
+          ln1 = cfg.bank_name ? `โอนเข้าบัญชี${cfg.bank_name}` : 'โอนเข้าบัญชีธนาคารทหารไทยธนชาต จำกัด (มหาชน)';
+          ln2 = data.tmb || '';
+          ln3 = 'กรุณาตรวจสอบเลขบัญชีของท่าน';
+        }
+
+        const sheet = document.createElement('div');
+        sheet.className = 'sheet';
+
+        sheet.innerHTML = `
+          <!-- Section 1: Header & Dividend Summary -->
+          <div>
+            <h1 class="report-title">${cfg.org_title || 'ใบรายงานเงินปันผลเฉลี่ยคืนประจำปี'} ${cfg.year || '2568'}</h1>
+            <h2 class="report-org">${cfg.org_name || 'สหกรณ์ออมทรัพย์กองบัญชาการกองทัพไทย จำกัด'}</h2>
+
+            <table class="header-table" style="margin-top: 4px;">
+              <tr>
+                <td style="width: 10%;">หน่วย</td>
+                <td style="width: 40%;">${data.dept || ''} ${data.deptname || ''}</td>
+                <td style="width: 20%;" class="text-right">ปันผล</td>
+                <td style="width: 15%;" class="text-right">เฉลี่ยคืน</td>
+                <td style="width: 15%;" class="text-right">รวมรับ</td>
+              </tr>
+              <tr>
+                <td>เลขสมาชิก</td>
+                <td>ชื่อ-สกุล</td>
+                <td class="text-right">${cfg.dividend_rate || '5.02%'}</td>
+                <td class="text-right">${cfg.refund_rate || '13.50%'}</td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td class="border-b-2">${String(data.memo || '').padStart(5, '0')}</td>
+                <td class="border-b-2">${data.name || ''}</td>
+                <td class="border-b-2 text-right">${p1}</td>
+                <td class="border-b-2 text-right">${p2}</td>
+                <td class="border-b-2 text-right">${sum_p}</td>
+              </tr>
+            </table>
+
+            <!-- Section 2: Balances & Deductions Table -->
+            <table class="content-table" style="margin-top: 4px;">
+              <tr>
+                <td colspan="2" style="width: 45%;">ยอดคงเหลือ&nbsp;&nbsp;&nbsp;<u class="u-line">${cfg.balance_date || 'ณ 30 ก.ย.68'}</u></td>
+                <td style="width: 5%;">&nbsp;</td>
+                <td colspan="2" style="width: 50%;"><u class="u-line">รายการหักเงิน</u></td>
+              </tr>
+              <tr>
+                <td>&nbsp;ทุนเรือนหุ้นสะสม</td>
+                <td class="text-right">${b1}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก เงินประกันชีวิต กรมธรรม์ที่ 3</td>
+                <td class="text-right">${d1}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;เงินกู้สามัญคงเหลือ</td>
+                <td class="text-right">${b2}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก เงินประกันชีวิต เงินกู้สามัญ</td>
+                <td class="text-right">${d2}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;เงินกู้พิเศษ1คงเหลือ</td>
+                <td class="text-right">${b3}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก เงินประกันภัย ผู้ค้ำประกัน</td>
+                <td class="text-right">${d3}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;เงินกู้พิเศษ2คงเหลือ</td>
+                <td class="text-right">${b4}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก เงินประกันชีวิต เงินกู้พิเศษ</td>
+                <td class="text-right">${d4}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;เงินกู้พิเศษ3คงเหลือ</td>
+                <td class="text-right">${b5}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ชำระหนี้ ภาระค้ำประกัน</td>
+                <td class="text-right">${d5}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;เงินกู้พิเศษ4คงเหลือ</td>
+                <td class="text-right">${b6}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ปันผล (ชำระต้นเงินสามัญ)</td>
+                <td class="text-right">${d6}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;ภาระค้ำประกันคงเหลือ</td>
+                <td class="text-right">${b7}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ชำระหนี้อื่นๆ</td>
+                <td class="text-right">${d7}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td class="text-right">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ฌาปนกิจ สสอท.</td>
+                <td class="text-right">${d81}</td>
+              </tr>
+              <tr>
+                <td colspan="2" class="text-center" style="font-size: 11pt;">${ln1}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ฌาปนกิจ สส.ชสอ.</td>
+                <td class="text-right">${d82}</td>
+              </tr>
+              <tr>
+                <td colspan="2" class="text-center" style="font-size: 16pt; text-decoration: underline;">${ln2}</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;หัก ฌาปนกิจ สส.สท./สส.สก.</td>
+                <td class="text-right">${d9}</td>
+              </tr>
+              <tr>
+                <td colspan="2" class="text-center" style="font-size: 10.5pt;">${ln3}</td>
+                <td>&nbsp;</td>
+                <td class="text-right">&nbsp;รวมหักเงินทั้งสิ้น</td>
+                <td class="text-right">${t1}</td>
+              </tr>
+              <tr>
+                <td colspan="2">&nbsp;</td>
+                <td>&nbsp;</td>
+                <td class="text-right">&nbsp;ยอดรับสุทธิ</td>
+                <td class="text-right border-b-2" style="font-weight: bold; font-size: 13.5pt;">${t2}</td>
+              </tr>
+              <tr>
+                <td colspan="2" class="text-right" style="padding-top: 4px;">
+                  <div>&nbsp;</div>${cfg.sign_rank || 'นาวาอากาศโท'}
+                </td>
+                <td colspan="2" style="padding-top: 4px;">
+                  &nbsp;&nbsp;<img src="${cfg.sign_image || 'assets/img/sign2025.png'}" style="width: 80px; height: auto;" onerror="this.style.visibility='hidden'">
+                </td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td colspan="3" style="text-indent: 120px;">
+                  ${cfg.sign_name || '(สุวัฒน์ชัย  เรื่อศรีจันทร์)'}
+                </td>
+                <td>&nbsp;</td>
+              </tr>
+              <tr>
+                <td>&nbsp;</td>
+                <td colspan="3" style="text-indent: 90px;">
+                  ${cfg.sign_position || 'กรรมการดำเนินการ ทำหน้าที่ผู้จัดการ'}
+                </td>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+
+            <!-- Section 3: Postal / Dispatch Address Slip -->
+            <div class="send-box">
+              <table>
+                <tr>
+                  <td colspan="2" style="font-weight: bold;">${cfg.org_name || 'สหกรณ์ออมทรัพย์กองบัญชาการกองทัพไทย จำกัด'}</td>
+                  <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td colspan="2">${cfg.post_box || 'ตู้ ปณ.62 ปณฝ.ศูนย์ราชการเฉลิมพระเกียรติ 10215'}</td>
+                  <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr><td colspan="4" style="height: 12px;"></td></tr>
+                <tr>
+                  <td style="width: 15%; text-align: right;">กรุณาส่ง&nbsp;</td>
+                  <td colspan="2" class="text-center" style="font-size: 14pt;">
+                    หน่วย ${data.dept || ''} ${data.deptname || ''}
+                  </td>
+                  <td style="width: 15%;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td colspan="2" class="text-center" style="font-size: 14pt;">
+                    ${String(data.memo || '').padStart(5, '0')} ${data.name || ''}
+                  </td>
+                  <td>&nbsp;</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;</td>
+                  <td colspan="2" class="text-center" style="font-size: 12pt;">
+                    ${data.addr || ''}
+                  </td>
+                  <td>&nbsp;</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <!-- Section 4: General Meeting Announcement Box -->
+          <div class="meeting-box">
+            <div class="meeting-title">${cfg.meeting_title || '**ประชุมใหญ่สามัญประจำปี 2568**'}</div>
+            <div style="font-size: 13pt; font-weight: bold; margin-bottom: 4px;">${cfg.meeting_date || 'วันพุธที่ 19 พฤศจิกายน 2568'}</div>
+            <table style="width: 80%; margin: 0 auto; text-align: left;">
+              <tr>
+                <td style="width: 50%;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เริ่มประชุมใหญ่ฯ</td>
+                <td>${cfg.meeting_time_start || 'เวลา 08.00- 14.30 น.'}</td>
+              </tr>
+              <tr>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เริ่มลงคะแนนเลือกตั้ง</td>
+                <td>${cfg.meeting_vote_time || 'เวลา 10.30 - 14.30 น.'}</td>
+              </tr>
+            </table>
+          </div>
+        `;
+
+        container.appendChild(sheet);
+      });
+    }
+
+    window.onload = loadReport;
+  </script>
+</body>
+</html>
