@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจสอบเงินปันผล - เฉลี่ยคืน สำหรับสมาชิก | สหกรณ์ออมทรัพย์ บก.ทท.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-dark: #172554;
+      --primary-light: #3b82f6;
+      --accent: #d97706;
+      --accent-light: #fef3c7;
+      --success: #059669;
+      --success-light: #ecfdf5;
+      --danger: #dc2626;
+      --danger-light: #fef2f2;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+    }
+
+    /* Container */
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 1rem 1.25rem;
+    }
+
+    /* Top Bar */
+    .top-header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: white;
+      box-shadow: var(--shadow-md);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.25rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: white;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      background: white;
+      border-radius: 50%;
+      padding: 2px;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .brand-text span {
+      font-size: 0.8rem;
+      color: #93c5fd;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-success {
+      background-color: var(--success);
+      color: white;
+    }
+    .btn-success:hover:not(:disabled) {
+      background-color: #047857;
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+    }
+    .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* Login View Container */
+    #loginView {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+      color: white;
+      text-align: center;
+      padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1rem;
+      background: white;
+      border-radius: 50%;
+      padding: 4px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .login-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .login-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+
+    .login-header p {
+      font-size: 0.9rem;
+      color: #bfdbfe;
+    }
+
+    .login-body {
+      padding: 1.75rem 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      font-size: 0.92rem;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      font-size: 1.05rem;
+      font-family: inherit;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      background-color: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Fixed Year Box */
+    .current-year-display {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      font-size: 1rem;
+      color: #1e3a8a;
+      font-weight: 600;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .input-toggle-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      padding: 4px;
+    }
+
+    .alert {
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      animation: shake 0.3s ease;
+    }
+
+    .alert-danger {
+      background-color: var(--danger-light);
+      border: 1px solid #fecaca;
+      color: var(--danger);
+    }
+
+    .login-footer-info {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Dashboard View */
+    #dashboardView {
+      display: none;
+      flex: 1;
+      padding: 1.5rem 0 3rem;
+    }
+
+    .profile-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-info h2 {
+      font-size: 1.35rem;
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    .profile-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .badge-primary { background: #dbeafe; color: #1e40af; }
+    .badge-secondary { background: #f1f5f9; color: #475569; }
+    .badge-success { background: var(--success-light); color: var(--success); }
+    .badge-warning { background: var(--accent-light); color: var(--accent); }
+
+    /* Hero Net Payout Card */
+    .hero-card {
+      background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 1.75rem;
+      box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4);
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: '฿';
+      position: absolute;
+      right: -15px;
+      bottom: -35px;
+      font-size: 180px;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.07);
+      pointer-events: none;
+    }
+
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-header span {
+      font-size: 1rem;
+      color: #a7f3d0;
+      font-weight: 500;
+    }
+
+    .hero-header .year-tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.2rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-family: 'Prompt', sans-serif;
+    }
+
+    .hero-amount {
+      font-size: 2.75rem;
+      font-weight: 700;
+      font-family: 'Prompt', sans-serif;
+      line-height: 1.1;
+      margin: 0.35rem 0 0.85rem;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-sub {
+      font-size: 0.95rem;
+      color: #d1fae5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Print Action Bar */
+    .action-banner {
+      background: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .action-text h3 {
+      font-size: 1.1rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.25rem;
+    }
+
+    .action-text p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    /* Breakdown Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stat-value {
+      font-family: 'Prompt', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .stat-rate {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Details Section */
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-amount {
+        font-size: 2.2rem;
+      }
+    }
+
+    .detail-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .detail-header {
+      background: #f1f5f9;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: #334155;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .detail-table tr {
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .detail-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .detail-table td {
+      padding: 0.65rem 1.25rem;
+    }
+
+    .detail-table td:last-child {
+      text-align: right;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 500;
+    }
+
+    .detail-table tr.total-row {
+      background-color: #f8fafc;
+      font-weight: 700;
+      border-top: 1.5px solid var(--border);
+    }
+
+    .detail-table tr.total-row td {
+      padding: 0.8rem 1.25rem;
+    }
+
+    /* Footer */
+    footer {
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 0;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-header">
+    <div class="top-nav">
+      <div class="brand">
+        <img src="assets/img/logocoop.png" alt="ตราสหกรณ์ บก.ทท." onerror="this.style.display='none'">
+        <div class="brand-text">
+          <h1>สหกรณ์ออมทรัพย์ บก.ทท. จำกัด</h1>
+          <span>ระบบตรวจสอบเงินปันผล - เฉลี่ยคืน (สำหรับสมาชิก)</span>
+        </div>
+      </div>
+      <div class="user-actions" id="navUserActions" style="display: none;">
+        <button class="btn btn-outline" onclick="logout()">
+          <span>ออกจากระบบ</span> ✕
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 1. LOGIN VIEW -->
+  <main id="loginView">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <img src="assets/img/logocoop.png" alt="ตราสหกรณ์ บก.ทท." onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'><circle cx=\'30\' cy=\'30\' r=\'28\' fill=\'%231e3a8a\'/></svg>'">
+        </div>
+        <h2>เข้าสู่ระบบสำหรับสมาชิก</h2>
+        <p>ตรวจสอบยอดเงินปันผลและพิมพ์ใบรายงานประจำปี</p>
+      </div>
+
+      <div class="login-body">
+        <div class="alert alert-danger" id="loginAlert"></div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <!-- Locked Current Year Badge -->
+          <div class="form-group">
+            <label class="form-label">ปีงบประมาณ</label>
+            <div class="current-year-display">
+              <span>📅</span>
+              <span id="loginYearText">กำลังโหลดปีงบประมาณ...</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="memoInput">รหัสสมาชิก</label>
+            <input type="text" id="memoInput" class="form-control" placeholder="เช่น 00022 หรือ 22" required autofocus autocomplete="off" inputmode="numeric">
+            <div class="form-hint">ระบุเลขสมาชิกของท่าน (ระบบจะเติม 0 ด้านหน้าให้อัตโนมัติ)</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="id4Input">เลขบัตรประชาชน (4 หลักสุดท้าย)</label>
+            <div class="input-wrapper">
+              <input type="password" id="id4Input" class="form-control" placeholder="••••" maxlength="4" required inputmode="numeric" pattern="[0-9]{4}">
+              <button type="button" class="input-toggle-btn" onclick="togglePasswordView()" title="แสดง/ซ่อน ตัวเลข">👁️</button>
+            </div>
+            <div class="form-hint">ระบุเฉพาะตัวเลข 4 หลักสุดท้ายของบัตรประชาชน 13 หลัก</div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="btnLogin" style="padding: 0.8rem; font-size: 1.05rem; margin-top: 0.5rem;">
+            <span id="btnLoginText">เข้าสู่ระบบ (Login)</span>
+            <span id="btnLoginSpinner" class="spinner" style="display: none;"></span>
+          </button>
+        </form>
+
+        <div class="login-footer-info">
+          🔒 ข้อมูลส่วนบุคคลได้รับการคุ้มครอง ระบบจะแสดงเฉพาะข้อมูลเงินปันผลของท่านเท่านั้น
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 2. DASHBOARD VIEW (Shown when authenticated) -->
+  <main id="dashboardView">
+    <div class="container">
+      
+      <!-- Profile Card -->
+      <section class="profile-card">
+        <div class="profile-info">
+          <h2 id="profName">-</h2>
+          <div class="profile-badges">
+            <span class="badge badge-primary">รหัสสมาชิก: <strong id="profMemo">-</strong></span>
+            <span class="badge badge-secondary">สังกัด: <span id="profDept">-</span></span>
+            <span class="badge badge-secondary">เลขบัตร ปชช.: <span id="profIdp">-</span></span>
+            <span class="badge badge-success" id="profPaymentStatus">สถานะการจ่าย: โอนธนาคาร</span>
+          </div>
+        </div>
+
+        <div>
+          <span class="badge badge-primary" style="font-size: 0.95rem; padding: 0.45rem 0.9rem;" id="dashYearBadge">
+            📅 ปีงบประมาณ -
+          </span>
+        </div>
+      </section>
+
+      <!-- Hero Net Payout Card -->
+      <section class="hero-card">
+        <div class="hero-header">
+          <span>ยอดเงินรับสุทธิ (Net Payout)</span>
+          <span class="year-tag" id="heroYearTag">ปีงบประมาณ -</span>
+        </div>
+        <div class="hero-amount" id="heroNetAmt">0.00 ฿</div>
+        <div class="hero-sub">
+          <div>รวมเงินได้: <strong id="heroSumP">0.00</strong> บาท</div>
+          <div>หักชำระ/ประกัน/ฌาปนกิจ: <strong id="heroSumD">0.00</strong> บาท</div>
+          <div id="heroBankInfo">บัญชีรับเงิน: <strong id="profBankAcc">-</strong></div>
+        </div>
+      </section>
+
+      <!-- Print Action Banner -->
+      <section class="action-banner">
+        <div class="action-text">
+          <h3>📄 ใบรายงานเงินปันผลเฉลี่ยคืนฉบับทางการ (PDF)</h3>
+          <p>เอกสารมาตรฐานขนาด A4 พร้อมรายละเอียดและตราสหกรณ์ สามารถดาวน์โหลดเป็นไฟล์ PDF หรือสั่งพิมพ์ได้ทันที</p>
+        </div>
+        <button class="btn btn-success" onclick="openOfficialPrint()">
+          <span>⬇️ ดาวน์โหลด / พิมพ์เป็น PDF</span>
+        </button>
+      </section>
+
+      <!-- Stats Grid (Summary Cards) -->
+      <section class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>เงินปันผล</span>
+            <span class="stat-rate" id="rateDividend">-</span>
+          </div>
+          <div class="stat-value" style="color: var(--primary);" id="statP1">0.00</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>เงินเฉลี่ยคืน</span>
+            <span class="stat-rate" id="rateRefund">-</span>
+          </div>
+          <div class="stat-value" style="color: var(--primary);" id="statP2">0.00</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>รวมรับเงินปันผล-เฉลี่ยคืน</span>
+          </div>
+          <div class="stat-value" style="color: var(--primary-dark);" id="statSumP">0.00</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">
+            <span>รวมรายการหักเงิน</span>
+          </div>
+          <div class="stat-value" style="color: var(--danger);" id="statTotalDeduct">0.00</div>
+        </div>
+      </section>
+
+      <!-- Details Grid (Balances & Deductions) -->
+      <div class="details-grid">
+        <!-- Card 1: Balances -->
+        <div class="detail-card">
+          <div class="detail-header">
+            <span>ยอดคงเหลือ <span id="balanceDateTxt" style="font-weight: normal; font-size: 0.85rem; color: #64748b;">(ณ สิ้นปีงบประมาณ)</span></span>
+            <span>จำนวนเงิน (บาท)</span>
+          </div>
+          <table class="detail-table">
+            <tbody>
+              <tr>
+                <td>ทุนเรือนหุ้นสะสม</td>
+                <td id="b_b1">-</td>
+              </tr>
+              <tr>
+                <td>เงินกู้สามัญคงเหลือ</td>
+                <td id="b_b2">-</td>
+              </tr>
+              <tr>
+                <td>เงินกู้พิเศษ 1 คงเหลือ</td>
+                <td id="b_b3">-</td>
+              </tr>
+              <tr>
+                <td>เงินกู้พิเศษ 2 คงเหลือ</td>
+                <td id="b_b4">-</td>
+              </tr>
+              <tr>
+                <td>เงินกู้พิเศษ 3 คงเหลือ</td>
+                <td id="b_b5">-</td>
+              </tr>
+              <tr>
+                <td>เงินกู้พิเศษ 4 คงเหลือ</td>
+                <td id="b_b6">-</td>
+              </tr>
+              <tr>
+                <td>ภาระค้ำประกันคงเหลือ</td>
+                <td id="b_b7">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Card 2: Deductions -->
+        <div class="detail-card">
+          <div class="detail-header">
+            <span>รายการหักเงิน</span>
+            <span>จำนวนเงิน (บาท)</span>
+          </div>
+          <table class="detail-table">
+            <tbody>
+              <tr>
+                <td>หัก เงินประกันชีวิต กรมธรรม์ที่ 3</td>
+                <td id="d_d1">-</td>
+              </tr>
+              <tr>
+                <td>หัก เงินประกันชีวิต เงินกู้สามัญ</td>
+                <td id="d_d2">-</td>
+              </tr>
+              <tr>
+                <td>หัก เงินประกันภัย ผู้ค้ำประกัน</td>
+                <td id="d_d3">-</td>
+              </tr>
+              <tr>
+                <td>หัก เงินประกันชีวิต เงินกู้พิเศษ</td>
+                <td id="d_d4">-</td>
+              </tr>
+              <tr>
+                <td>หัก ชำระหนี้ ภาระค้ำประกัน</td>
+                <td id="d_d5">-</td>
+              </tr>
+              <tr>
+                <td>หัก ปันผล (ชำระต้นเงินสามัญ)</td>
+                <td id="d_d6">-</td>
+              </tr>
+              <tr>
+                <td>หัก ชำระหนี้อื่นๆ</td>
+                <td id="d_d7">-</td>
+              </tr>
+              <tr>
+                <td>หัก ฌาปนกิจ สสอท.</td>
+                <td id="d_d81">-</td>
+              </tr>
+              <tr>
+                <td>หัก ฌาปนกิจอื่นๆ</td>
+                <td id="d_d8_other">-</td>
+              </tr>
+              <tr class="total-row">
+                <td style="color: var(--danger);">รวมรายการหักทั้งสิ้น</td>
+                <td style="color: var(--danger);" id="d_total">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Coop Info & Notice -->
+      <section style="background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; font-size: 0.9rem; color: #475569;">
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: #1e293b; margin-bottom: 0.35rem;" id="meetingTitle">ข้อมูลการประชุมและติดต่อสหกรณ์</h4>
+        <p id="meetingNotice" style="line-height: 1.6;">-</p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>สหกรณ์ออมทรัพย์กองบัญชาการกองทัพไทย จำกัด</p>
+      <p style="font-size: 0.78rem; margin-top: 0.25rem;">ระบบตรวจสอบเงินปันผลเฉลี่ยคืนสำหรับสมาชิก</p>
+    </div>
+  </footer>
+
+  <script>
+    let currentMember = null;
+    let currentYear = '';
+    let currentBeYear = '';
+    let currentConfig = {};
+
+    // Helper: Format currency
+    function fmt(val) {
+      if (val === null || val === undefined || val === '' || val === 0 || val === '0' || parseFloat(val) === 0) {
+        return '-';
+      }
+      return parseFloat(val).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtZero(val) {
+      if (val === null || val === undefined || val === '' || isNaN(parseFloat(val))) return '0.00';
+      return parseFloat(val).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Toggle password view
+    function togglePasswordView() {
+      const input = document.getElementById('id4Input');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Load active fiscal year (ดึงปีปัจจุบันอย่างเดียว)
+    async function initCurrentYear() {
+      try {
+        const res = await fetch('/api/current-year');
+        const data = await res.json();
+        currentYear = data.year;
+        currentBeYear = data.beYear;
+        currentConfig = data.config || {};
+
+        document.getElementById('loginYearText').textContent = `ปีงบประมาณ ${currentBeYear} (${currentYear})`;
+      } catch (err) {
+        console.error('Error loading current year:', err);
+        document.getElementById('loginYearText').textContent = 'ปีงบประมาณปัจจุบัน';
+      }
+    }
+
+    // Check existing session
+    async function checkSession() {
+      try {
+        const res = await fetch('/api/member/me');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.authenticated && data.member) {
+            currentMember = data.member;
+            currentYear = data.year;
+            currentBeYear = data.beYear;
+            await loadConfig(currentYear);
+            showDashboard();
+            return;
+          }
+        }
+      } catch (e) {}
+      showLogin();
+    }
+
+    async function loadConfig(year) {
+      try {
+        const res = await fetch(`/api/config?year=${year}`);
+        currentConfig = await res.json();
+      } catch (e) {
+        console.error('Error loading config:', e);
+      }
+    }
+
+    function showLogin() {
+      document.getElementById('loginView').style.display = 'flex';
+      document.getElementById('dashboardView').style.display = 'none';
+      document.getElementById('navUserActions').style.display = 'none';
+      document.getElementById('memoInput').focus();
+    }
+
+    function showDashboard() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('dashboardView').style.display = 'block';
+      document.getElementById('navUserActions').style.display = 'flex';
+      renderDashboard();
+    }
+
+    // Handle Login Submit (ล็อกปีปัจจุบันอย่างเดียว)
+    async function handleLogin(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById('loginAlert');
+      const btn = document.getElementById('btnLogin');
+      const btnText = document.getElementById('btnLoginText');
+      const btnSpinner = document.getElementById('btnLoginSpinner');
+
+      alertBox.style.display = 'none';
+      btn.disabled = true;
+      btnText.textContent = 'กำลังตรวจสอบข้อมูล...';
+      btnSpinner.style.display = 'inline-block';
+
+      const memo = document.getElementById('memoInput').value.trim();
+      const id4 = document.getElementById('id4Input').value.trim();
+
+      try {
+        const res = await fetch('/api/member/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ memo, id4 })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          currentMember = data.member;
+          currentYear = data.year;
+          currentBeYear = data.beYear;
+          await loadConfig(currentYear);
+          showDashboard();
+        } else {
+          alertBox.textContent = data.message || 'รหัสสมาชิกหรือเลขบัตรประชาชน 4 หลักท้ายไม่ถูกต้อง';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง';
+        alertBox.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'เข้าสู่ระบบ (Login)';
+        btnSpinner.style.display = 'none';
+      }
+    }
+
+    // Render Dashboard Data
+    function renderDashboard() {
+      if (!currentMember) return;
+      const m = currentMember;
+      const cfg = currentConfig || {};
+      const beYear = currentBeYear || (parseInt(currentYear, 10) + 543);
+
+      // Fixed Year Badge
+      document.getElementById('dashYearBadge').textContent = `📅 ปีงบประมาณ ${beYear}`;
+
+      // Profile
+      document.getElementById('profName').textContent = m.name || '-';
+      document.getElementById('profMemo').textContent = String(m.memo || '').padStart(5, '0');
+      document.getElementById('profDept').textContent = `${m.dept || ''} ${m.deptname || ''}`.trim() || '-';
+      document.getElementById('profIdp').textContent = m.idp_masked || '-';
+
+      // Status & Bank
+      const paymentBadge = document.getElementById('profPaymentStatus');
+      if (m.status === 'ศาลอายัด') {
+        paymentBadge.className = 'badge badge-warning';
+        paymentBadge.textContent = 'สถานะ: ศาลอายัด';
+      } else if (m.status === 'เงินสด') {
+        paymentBadge.className = 'badge badge-primary';
+        paymentBadge.textContent = 'สถานะ: รับเงินสด';
+      } else {
+        paymentBadge.className = 'badge badge-success';
+        paymentBadge.textContent = 'สถานะ: โอนธนาคาร';
+      }
+
+      document.getElementById('profBankAcc').textContent = m.tmb_masked || (m.tmb ? m.tmb : '-');
+
+      // Hero Card
+      document.getElementById('heroYearTag').textContent = `ปีงบประมาณ ${beYear}`;
+      document.getElementById('heroNetAmt').textContent = `${fmtZero(m.t2)} ฿`;
+      document.getElementById('heroSumP').textContent = fmtZero(m.sum_p);
+      document.getElementById('heroSumD').textContent = fmtZero(m.t1);
+
+      // Rates & Stats Cards
+      document.getElementById('rateDividend').textContent = cfg.dividend_rate ? `(${cfg.dividend_rate})` : '';
+      document.getElementById('rateRefund').textContent = cfg.refund_rate ? `(${cfg.refund_rate})` : '';
+      document.getElementById('statP1').textContent = fmt(m.p1);
+      document.getElementById('statP2').textContent = fmt(m.p2);
+      document.getElementById('statSumP').textContent = fmt(m.sum_p);
+      document.getElementById('statTotalDeduct').textContent = fmt(m.t1);
+
+      // Balances
+      document.getElementById('balanceDateTxt').textContent = cfg.balance_date ? `(${cfg.balance_date})` : '(ณ สิ้นปีงบประมาณ)';
+      document.getElementById('b_b1').textContent = fmt(m.b1);
+      document.getElementById('b_b2').textContent = fmt(m.b2);
+      document.getElementById('b_b3').textContent = fmt(m.b3);
+      document.getElementById('b_b4').textContent = fmt(m.b4);
+      document.getElementById('b_b5').textContent = fmt(m.b5);
+      document.getElementById('b_b6').textContent = fmt(m.b6);
+      
+      const b7Total = (parseFloat(m.b71) || 0) + (parseFloat(m.b72) || 0);
+      document.getElementById('b_b7').textContent = fmt(b7Total);
+
+      // Deductions
+      document.getElementById('d_d1').textContent = fmt(m.d1);
+      document.getElementById('d_d2').textContent = fmt(m.d2);
+      document.getElementById('d_d3').textContent = fmt(m.d3);
+      document.getElementById('d_d4').textContent = fmt(m.d4);
+      document.getElementById('d_d5').textContent = fmt(m.d5);
+      document.getElementById('d_d6').textContent = fmt(m.d6);
+      document.getElementById('d_d7').textContent = fmt(m.d7);
+      document.getElementById('d_d81').textContent = fmt(m.d81);
+
+      const d8OtherTotal = (parseFloat(m.d82) || 0) + (parseFloat(m.d83) || 0) + (parseFloat(m.d84) || 0);
+      document.getElementById('d_d8_other').textContent = fmt(d8OtherTotal);
+      document.getElementById('d_total').textContent = fmt(m.t1);
+
+      // Meeting info
+      if (cfg.meeting_title) {
+        document.getElementById('meetingTitle').textContent = cfg.meeting_title.replace(/\*\*/g, '');
+      }
+      let noticeHtml = '';
+      if (cfg.meeting_date) noticeHtml += `<strong>กำหนดการ:</strong> ${cfg.meeting_date} ${cfg.meeting_time_start || ''}<br>`;
+      if (cfg.meeting_vote_time) noticeHtml += `<strong>เวลาลงคะแนน:</strong> ${cfg.meeting_vote_time}<br>`;
+      if (cfg.bank_name) noticeHtml += `<strong>โอนเข้าบัญชี:</strong> ${cfg.bank_name}<br>`;
+      if (cfg.post_box) noticeHtml += `<strong>สถานที่ติดต่อ:</strong> ${cfg.org_name || ''} ${cfg.post_box}`;
+      document.getElementById('meetingNotice').innerHTML = noticeHtml || 'ติดต่อสอบถามข้อมูลเพิ่มเติมได้ที่สำนักงานสหกรณ์ออมทรัพย์ บก.ทท. จำกัด';
+    }
+
+    // Open official print.html for this member
+    function openOfficialPrint() {
+      if (!currentMember) return;
+      const memo = String(currentMember.memo || '').padStart(5, '0');
+      const url = `print.html?year=${currentYear}&memos=${memo}`;
+      window.open(url, '_blank');
+    }
+
+    // Logout
+    async function logout() {
+      try {
+        await fetch('/api/member/logout', { method: 'POST' });
+      } catch (e) {}
+      currentMember = null;
+      document.getElementById('loginForm').reset();
+      showLogin();
+    }
+
+    // Init on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      await initCurrentYear();
+      await checkSession();
+    });
+  </script>
+</body>
+</html>

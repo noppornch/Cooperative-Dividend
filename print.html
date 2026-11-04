@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="assets/html2pdf.bundle.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -172,13 +173,19 @@
   <!-- Floating Print Bar -->
   <div class="print-bar">
     <div>
-      <strong>🖨️ ระบบพิมพ์ใบรายงานเงินปันผลเฉลี่ยคืน</strong>
+      <strong>📄 ใบรายงานเงินปันผลเฉลี่ยคืน</strong>
       <span style="opacity: 0.8; margin-left: 10px;" id="statusText">กำลังจัดเตรียมข้อมูล...</span>
     </div>
-    <div>
-      <button class="btn-print" onclick="window.print()">
+    <div style="display: flex; align-items: center; gap: 0.4rem;">
+      <!-- Default Primary Action: Download PDF -->
+      <button class="btn-print" id="btnDownload" onclick="downloadPDF()" style="background: #10b981;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+        <span id="btnDownloadText">ดาวน์โหลดไฟล์ PDF</span>
+      </button>
+      <!-- Secondary Action: Print via printer -->
+      <button class="btn-print" onclick="window.print()" style="background: #2563eb;" title="สั่งพิมพ์ทางเครื่องพิมพ์">
         <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-        พิมพ์เอกสาร / บันทึกเป็น PDF
+        พิมพ์เอกสาร (Print)
       </button>
       <button class="btn-close" onclick="window.close()">✕ ปิดหน้าต่าง</button>
     </div>
@@ -190,6 +197,8 @@
 
   <script>
     let appConfig = {};
+    let currentMemberList = [];
+    let currentYear = '';
 
     function fmt(val) {
       if (val === null || val === undefined || val === '' || val === 0 || val === '0' || parseFloat(val) === 0) {
@@ -244,6 +253,7 @@
     }
 
     function renderSheets(list) {
+      currentMemberList = list;
       const container = document.getElementById('pageContainer');
       container.innerHTML = '';
 
@@ -253,6 +263,17 @@
       }
 
       const cfg = appConfig;
+
+      if (list.length === 1) {
+        const m = list[0];
+        const memo = String(m.memo || '').padStart(5, '0');
+        const safeName = (m.name || '').replace(/[\/\\?%*:|"<>]/g, '').trim();
+        document.title = `ใบรายงานเงินปันผล_${cfg.year || currentYear}_${memo}_${safeName}`;
+        document.getElementById('statusText').textContent = `พร้อมดาวน์โหลด (ปี ${cfg.year || currentYear}) รหัส ${memo} ${safeName}`;
+      } else {
+        document.title = `ใบรายงานเงินปันผล_${cfg.year || currentYear}_รวม_${list.length}ราย`;
+        document.getElementById('statusText').textContent = `พร้อมดาวน์โหลด (ปี ${cfg.year || currentYear}) ทั้งหมด ${list.length.toLocaleString()} รายการ`;
+      }
 
       list.forEach((data, index) => {
         // Formatting values
@@ -501,6 +522,66 @@
 
         container.appendChild(sheet);
       });
+    }
+
+    async function downloadPDF() {
+      const sheets = document.querySelectorAll('.sheet');
+      if (sheets.length === 0) {
+        alert('ไม่พบข้อมูลสำหรับดาวน์โหลด');
+        return;
+      }
+
+      const btn = document.getElementById('btnDownload');
+      const btnText = document.getElementById('btnDownloadText');
+      const originalText = btnText ? btnText.textContent : 'ดาวน์โหลดไฟล์ PDF';
+      if (btn) btn.disabled = true;
+      if (btnText) btnText.textContent = 'กำลังสร้างไฟล์ PDF...';
+
+      const filename = `${document.title || 'ใบรายงานเงินปันผลเฉลี่ยคืน'}.pdf`;
+
+      if (typeof html2pdf !== 'undefined') {
+        try {
+          if (sheets.length === 1) {
+            const opt = {
+              margin: 0,
+              filename: filename,
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true, logging: false },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            await html2pdf().set(opt).from(sheets[0]).save();
+          } else {
+            const tempContainer = document.createElement('div');
+            sheets.forEach(sheet => {
+              const clone = sheet.cloneNode(true);
+              clone.style.boxShadow = 'none';
+              clone.style.margin = '0';
+              clone.style.pageBreakAfter = 'always';
+              tempContainer.appendChild(clone);
+            });
+
+            const opt = {
+              margin: 0,
+              filename: filename,
+              image: { type: 'jpeg', quality: 0.95 },
+              html2canvas: { scale: 1.5, useCORS: true, logging: false },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+              pagebreak: { mode: ['css', 'legacy'] }
+            };
+            await html2pdf().set(opt).from(tempContainer).save();
+          }
+        } catch (err) {
+          console.error('html2pdf generation error, fallback to print:', err);
+          window.print();
+        } finally {
+          if (btn) btn.disabled = false;
+          if (btnText) btnText.textContent = originalText;
+        }
+      } else {
+        window.print();
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = originalText;
+      }
     }
 
     window.onload = loadReport;
